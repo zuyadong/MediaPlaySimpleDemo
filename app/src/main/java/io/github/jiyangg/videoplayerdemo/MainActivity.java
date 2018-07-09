@@ -3,44 +3,45 @@ package io.github.jiyangg.videoplayerdemo;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.widget.ToggleButton;
+import android.widget.MediaController;
+import android.widget.VideoView;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 
-import io.github.jiyangg.videoplayerdemo.player.IPlayerCallBack;
 import io.github.jiyangg.videoplayerdemo.player.PlayerView;
-import io.github.jiyangg.videoplayerdemo.player.VideoPlayer;
 
-public class MainActivity extends AppCompatActivity implements IPlayerCallBack {
-    private VideoPlayer player;
-    private PlayerView playerView;
+public class MainActivity extends AppCompatActivity {
+    private String videoPath;
+    private PlayerView mPlayView;
+    private VideoView systemVideoView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        playerView = (PlayerView) findViewById(R.id.surfaceView);
-        ToggleButton btnControl = (ToggleButton) findViewById(R.id.btnControl);
-        player = new VideoPlayer(playerView.getHolder().getSurface(), initData());
-        player.setCallBack(this);
-        btnControl.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (player.isPlaying()) {
-                    player.stop();
-                } else {
-                    player.play();
-                }
-            }
-        });
+        initData();
+        initMPlayer();
+        initSystemPlayer();
+    }
+
+    private void initSystemPlayer() {
+        systemVideoView = findViewById(R.id.videoView);
+        MediaController mediaController = new MediaController(this);
+        mediaController.show();
+        systemVideoView.setMediaController(mediaController);
+        systemVideoView.setVideoPath(videoPath);
+    }
+
+    private void initMPlayer() {
+        mPlayView = findViewById(R.id.mPlayerView);
+        mPlayView.setVideoFilePath(videoPath);
     }
 
     //将raw里video拷贝到文件
-    private String initData() {
+    private void initData() {
         File dir = getFilesDir();
         File path = new File(dir, "shape.mp4");
         final BufferedInputStream in = new BufferedInputStream(getResources().openRawResource(R.raw.shape_of_my_heart));
@@ -59,24 +60,16 @@ public class MainActivity extends AppCompatActivity implements IPlayerCallBack {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return path.toString();
+        videoPath = path.toString();
     }
 
     @Override
-    protected void onDestroy() {
-        if (player != null) {
-            player.destroy();
-        }
-        super.onDestroy();
+    protected void onPause() {
+        super.onPause();
+        if (mPlayView != null)
+            mPlayView.pause();
+        if (systemVideoView != null)
+            systemVideoView.pause();
     }
 
-    @Override
-    public void videoAspect(final int width, final int height, float time) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                playerView.setAspect((float) width / height);
-            }
-        });
-    }
 }

@@ -28,6 +28,14 @@ public class VideoPlayer {
         this.filePath = filePath;
     }
 
+    public VideoPlayer(Surface surface) {
+        this.surface = surface;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
     public void setCallBack(IPlayerCallBack callBack) {
         this.callBack = callBack;
     }
@@ -59,8 +67,8 @@ public class VideoPlayer {
     }
 
     /*将缓冲区传递至解码器
-    * 如果到了文件末尾，返回true;否则返回false
-    */
+     * 如果到了文件末尾，返回true;否则返回false
+     */
     private boolean putBufferToCoder(MediaExtractor extractor, MediaCodec decoder, ByteBuffer[] inputBuffers) {
         boolean isMediaEOS = false;
         int inputBufferIndex = decoder.dequeueInputBuffer(TIMEOUT_US);
@@ -82,7 +90,7 @@ public class VideoPlayer {
     //获取指定类型媒体文件所在轨道
     private int getMediaTrackIndex(MediaExtractor videoExtractor, String MEDIA_TYPE) {
         int trackIndex = -1;
-        for (int i = 0; i < videoExtractor.getTrackCount(); i++) {          
+        for (int i = 0; i < videoExtractor.getTrackCount(); i++) {
             MediaFormat mediaFormat = videoExtractor.getTrackFormat(i);
             String mime = mediaFormat.getString(MediaFormat.KEY_MIME);
             if (mime.startsWith(MEDIA_TYPE)) {
@@ -108,6 +116,10 @@ public class VideoPlayer {
     private class VideoThread extends Thread {
         @Override
         public void run() {
+            if (surface == null || !surface.isValid()) {
+                Log.e("TAG", "surface invalid!");
+                return;
+            }
             MediaExtractor videoExtractor = new MediaExtractor();
             MediaCodec videoCodec = null;
             try {
