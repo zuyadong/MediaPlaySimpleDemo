@@ -16,3 +16,5 @@
 * AudioThread:Decode audio. Output audio.
 
 *At least Android Api 16*
+
+- [ ] MediaSync Support
