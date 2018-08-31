@@ -17,4 +17,6 @@
 
 *At least Android Api 16*
 
+## TODO
+
 - [ ] MediaSync Support
